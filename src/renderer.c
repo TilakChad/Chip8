@@ -22,7 +22,7 @@ Point map_screen_ndc(Point scr)
 }
 
 
-int initialize_renderer(struct Renderer* render_engine, struct frameBuffer* frame_buffer)
+int initialize_renderer(struct Renderer* render_engine, struct frameBuffer* frame_buffer, int width, int height)
 {
 	// List of vertices need be modified now 
 	// float vertices[] = { 0.5f,0.5f,0.5f,-0.5f,-0.5f,-0.5f,-0.5f,0.5 };
@@ -35,6 +35,9 @@ int initialize_renderer(struct Renderer* render_engine, struct frameBuffer* fram
 	// calculate all the points that will be used to render the chip8 emulator
 	float* vertices = malloc(2 * sizeof(float) * (MAX_X_POINTS + 1) * (MAX_Y_POINTS + 1));
 
+	// It is the aspect ratio that will be used for uniform border and importantly making the pixel square
+	float aspect_ratio = (float)width / height;
+
 	// lets store it in column major order for now 
 	int vertex_index = 0;
 	for (int y = 0; y < MAX_Y_POINTS + 1; ++y)
@@ -42,8 +45,8 @@ int initialize_renderer(struct Renderer* render_engine, struct frameBuffer* fram
 		for (int x = 0; x < MAX_X_POINTS + 1; ++x)
 		{
 			Point p = map_screen_ndc((Point) { x, y});
-			vertices[vertex_index++] = p.x;
-			vertices[vertex_index++] = p.y;
+			vertices[vertex_index++] = p.x ;
+			vertices[vertex_index++] = p.y * aspect_ratio/2;
 		}
 	}
 
@@ -109,7 +112,7 @@ int initialize_renderer(struct Renderer* render_engine, struct frameBuffer* fram
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glUseProgram(0);
-	render_engine->vertex_array = VAO;
+	render_engine->scr_vertex_array = VAO;
 	render_engine->shader_program = shaderProgram;
 
 	// Lastly initialize the framebuffer
@@ -121,6 +124,27 @@ int initialize_renderer(struct Renderer* render_engine, struct frameBuffer* fram
 	frame_buffer->height = MAX_Y_POINTS;
 	frame_buffer->width = MAX_X_POINTS;
 
+	for (int i = 0; i < MAX_X_POINTS * MAX_Y_POINTS; ++i)
+		frame_buffer->array[i] = 0;
+
+	// Initialize the second vertex array 
+	glGenVertexArrays(1, &render_engine->border_vertex_array);
+	glBindVertexArray(render_engine->border_vertex_array);
+
+	float k = aspect_ratio / 2;
+	float border_vertices[] = { -0.775f, 0.80f*k, 0.775f, 0.80f*k, 0.775f, -0.80f*k, -0.775f, 0.80f*k, 0.775f, -0.8f*k, -0.775f, -0.8f*k };
+	GLuint vbo;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(border_vertices), border_vertices, GL_STATIC_DRAW);
+
+	// No need of element buffer 
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, NULL);
+	glEnableVertexAttribArray(0);
+
+	free(vertices);
+
+	glBindVertexArray(0);
 	return 0;
 }
 
@@ -221,18 +245,26 @@ void compile_and_log_shaders(struct shader* shaders, int shader_type)
 void rendering_loop(struct Renderer* render_engine, struct frameBuffer* frame_buffer)
 {
 	// Using 1D array as 2D array 
+	// render border first 
+	glBindVertexArray(render_engine->border_vertex_array);
+	glUniform1i(glGetUniformLocation(render_engine->shader_program, "pixel"), 4);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glBindVertexArray(render_engine->scr_vertex_array);
+
 	for (unsigned int y = 0; y < frame_buffer->height; ++y)
 	{
 		for (unsigned int x = 0; x < frame_buffer->width; ++x)
 		{
-			if (*(frame_buffer->array + y * (MAX_X_POINTS)+x) == 1)
-			{
-			}
-			else
-			{
-			}
+			glUniform1i(glGetUniformLocation(render_engine->shader_program, "pixel"), *(frame_buffer->array + y * (MAX_X_POINTS)+x));
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)(sizeof(GLuint) * (y * MAX_X_POINTS + x) * 6));
 		}
 	}
 	
+}
+
+void reset_framebuffer(struct frameBuffer* frame_buffer)
+{
+	for (int i = 0; i < MAX_X_POINTS * MAX_Y_POINTS; ++i)
+		frame_buffer->array[i] = 0;
 }
