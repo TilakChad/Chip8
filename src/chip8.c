@@ -9,7 +9,7 @@ extern void handle_key_press(GLFWwindow*, chip8_emulator*);
 
 // Our emulator should first fetch one instruction (2 byte) from the loaded rom (whole rom is loaded at once in memory of chip8)
 // And then it should decode it // Don't know difference between decoding and executing though
-// And finally execute it 
+// And finally execute it ..
 
 void initialize_chip8_emulator(chip8_emulator* chip8, const char* rom_path)
 {
