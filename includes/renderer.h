@@ -2,8 +2,6 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 #include <glad/glad.h>
-#include <time.h>
-#include <stdint.h>
 
 struct shader
 {

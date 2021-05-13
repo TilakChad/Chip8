@@ -127,8 +127,6 @@ int initialize_renderer(struct Renderer* render_engine, struct frameBuffer* fram
 	for (int i = 0; i < MAX_X_POINTS * MAX_Y_POINTS; ++i)
 		frame_buffer->array[i] = 0;
 
-	// Initialized with not possible value
-
 	// Initialize the second vertex array 
 	glGenVertexArrays(1, &render_engine->border_vertex_array);
 	glBindVertexArray(render_engine->border_vertex_array);
