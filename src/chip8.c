@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "../includes/chip8.h"
 #include "../includes/renderer.h"
 #include <string.h>
@@ -148,11 +149,13 @@ void decode_and_execute(chip8_emulator* chip8, struct frameBuffer* frame_buffer,
 		break;
 	case 0x00EE: // return from the subroutine
 		// Retrieve the program counter which was stored in the network order
+	{
 		uint16_t PC = 0;
 		PC = chip8->memory[chip8->stack_pointer + 2];
 		PC = (PC << 8) | chip8->memory[chip8->stack_pointer + 1];
 		chip8->program_counter = PC;
 		chip8->stack_pointer += 2;
+	}
 		break;
 	default:
 		fprintf(stderr, "\nInvalid instruction starting with 0");
@@ -423,10 +426,12 @@ void decode_and_execute(chip8_emulator* chip8, struct frameBuffer* frame_buffer,
 			chip8->instruction_register += chip8->registers.reg[reg_x];
 			break;
 		case 0x29:
+		{
 			// Location of sprite of digit Vx
 			// Our digit location are stored at address 0x100
 			uint16_t location = 0x100 + chip8->registers.reg[reg_x] * 5;
 			chip8->instruction_register = location;
+		}
 			break;
 		case 0x33:
 		{
