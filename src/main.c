@@ -116,7 +116,7 @@ int main(int argc, char** argv)
 			time_accumulate = 0;
 		}
 		then = glfwGetTime();
-		deltaTime = (double)(then - now);
+		deltaTime = then - now;
 		timer += deltaTime;
 		now = then;
 		tick(&chip8, deltaTime);
