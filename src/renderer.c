@@ -29,7 +29,7 @@ int initialize_renderer(struct Renderer* render_engine, struct frameBuffer* fram
 	// So the chip8 screen size is 64*32 pixel .. we are going to use a square for a pixel so we will have 65 points in x direction and 33 points in y direction
 
 	struct shader chip8_shader;
-	int err = load_shader_from_file(&chip8_shader, "./src/chip8_vertex.vs", "./src/chip8_fragment.fs");
+	int err = load_shader_from_file(&chip8_shader, "./src/shaders/chip8_vertex.vs", "./src/shaders/chip8_fragment.fs");
 	assert(err != -1);
 
 	// calculate all the points that will be used to render the chip8 emulator

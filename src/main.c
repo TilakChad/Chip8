@@ -68,7 +68,7 @@ int main(int argc, char** argv)
 	// Load the glad library
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
-		fputs("Error laoding GLAD library.. ", stderr);
+		fputs("Error loading GLAD library.. ", stderr);
 		return -3;
 	}
 
@@ -85,7 +85,7 @@ int main(int argc, char** argv)
 	initialize_renderer(&render_engine, &frame_buffer, 1200, 800);
 	chip8_emulator chip8;
 
-	const char* rom_path = "D:\\Computer\\C\\Chip-8\\Chip8\\roms\\space.ch8";
+	const char* rom_path = "./roms/tetris.ch8";
 	initialize_chip8_emulator(&chip8, rom_path);
 	double now = 0, then = 0;
 	glfwSwapInterval(0);
