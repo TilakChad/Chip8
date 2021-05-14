@@ -507,5 +507,5 @@ void tick(chip8_emulator* chip8, float deltaTime)
 			chip8->delay_register--;
 		chip8->time_accumulate -= 1.0f / 60;
 	}
-	fprintf(stderr, "\nFPS is -> %f.", 1 / deltaTime);
+	// fprintf(stderr, "\nFPS is -> %f.", 1 / deltaTime);
 }
