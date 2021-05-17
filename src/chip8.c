@@ -35,6 +35,9 @@ void initialize_chip8_emulator(chip8_emulator* chip8, const char* rom_path)
 	load_rom(chip8, rom_path);
 	write_sprite_data(chip8);
 
+	// Initialize the sound here 
+	chip8->wav_file = cs_load_wav("./includes/airlock.wav");
+	chip8->play_sound = cs_make_def(&chip8->wav_file);
 }
 
 void write_sprite_data(chip8_emulator* chip8)
@@ -487,7 +490,7 @@ void load_rom(chip8_emulator* chip8, const char* rom_path)
 
 	fseek(fp, 0, SEEK_END);
 	long bytes = ftell(fp);
-	fprintf(stderr, "\nTotal bytes read were > %lld.", bytes);
+	fprintf(stderr, "\nTotal bytes read were > %ld.", bytes);
 	assert(bytes + 0x200 < 0xFFF);
 	fseek(fp, 0, SEEK_SET);
 
@@ -505,7 +508,16 @@ void tick(chip8_emulator* chip8, float deltaTime)
 	{
 		if (chip8->delay_register != 0)
 			chip8->delay_register--;
+		if (chip8->sound_register != 0)
+		{
+			cs_play_sound(chip8->sound_context, chip8->play_sound);
+			chip8->sound_register--;
+			fprintf(stderr, "Output from sound register is : %hu.", chip8->sound_register);
+		}
 		chip8->time_accumulate -= 1.0f / 60;
 	}
+	if (chip8->time_accumulate < 0.2f)
+		cs_mix(chip8->sound_context);
+
 	// fprintf(stderr, "\nFPS is -> %f.", 1 / deltaTime);
 }
