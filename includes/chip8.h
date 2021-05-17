@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <GLFW/glfw3.h>
+#include "../includes/cute_sound.h"
 
 typedef struct chip8_emulator
 {
@@ -20,6 +21,9 @@ typedef struct chip8_emulator
 	uint8_t recent_key;
 	bool should_render;
 	float time_accumulate;
+	cs_loaded_sound_t wav_file;
+	cs_play_sound_def_t play_sound;
+	cs_context_t* sound_context; 
 } chip8_emulator;
 
 void initialize_chip8_emulator(chip8_emulator* chip8, const char* rom_path);
