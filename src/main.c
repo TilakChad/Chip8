@@ -1,11 +1,13 @@
 #define _CRT_SECURE_NO_WARNINGS
-
+#define CUTE_SOUND_IMPLEMENTATION
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include "../includes/renderer.h"
 #include "../includes/chip8.h"
 #include <time.h>
+#include <GLFW/glfw3native.h>
+#include <assert.h>
 
 typedef struct UserPointer
 {
@@ -85,8 +87,18 @@ int main(int argc, char** argv)
 	initialize_renderer(&render_engine, &frame_buffer, 1200, 800);
 	chip8_emulator chip8;
 
-	const char* rom_path = "./roms/tetris.ch8";
+	const char* rom_path = "./roms/space.ch8";
 	initialize_chip8_emulator(&chip8, rom_path);
+#ifdef _WIN32
+	chip8.sound_context = cs_make_context(glfwGetWin32Window(window), 44100, 8192, 5, NULL);
+#elif _linux_ 
+	chip8.sound_context = cs_make_context(glfwGetX11Window(window), 44100, 8192, 5, NULL);
+#endif
+	assert(chip8.sound_context != NULL);
+	if (chip8.sound_context == NULL)
+	{
+		fprintf(stderr, "\nSound context NULL..");
+	}
 	double now = 0, then = 0;
 	glfwSwapInterval(0);
 	int counter = 0;
