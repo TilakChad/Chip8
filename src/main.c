@@ -98,6 +98,7 @@ int main(int argc, char** argv)
 	if (chip8.sound_context == NULL)
 	{
 		fprintf(stderr, "\nSound context NULL..");
+		return -1;
 	}
 	double now = 0, then = 0;
 	glfwSwapInterval(0);
