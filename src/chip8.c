@@ -35,9 +35,11 @@ void initialize_chip8_emulator(chip8_emulator* chip8, const char* rom_path)
 	load_rom(chip8, rom_path);
 	write_sprite_data(chip8);
 
-	// Initialize the sound here 
+	// Initialize the sound here
+	#ifdef _WIN32
 	chip8->wav_file = cs_load_wav("./includes/airlock.wav");
 	chip8->play_sound = cs_make_def(&chip8->wav_file);
+	#endif
 }
 
 void write_sprite_data(chip8_emulator* chip8)
@@ -60,7 +62,8 @@ void write_sprite_data(chip8_emulator* chip8)
 							0xF0, 0x80, 0xF0, 0x80, 0xF0,
 							0xF0, 0x80, 0xF0, 0x80, 0x80 };
 
-	int err = memcpy_s(chip8->memory + 0x100, 80, temp, 80);
+	// int err = memcpy_s(chip8->memory + 0x100, 80, temp, 80); // same Annex K functions .. need to define some macro first to use them . but leave it for now
+	memcpy(chip8->memory+0x100,temp,80);
 }
 
 void render_sprite(chip8_emulator* chip8, struct frameBuffer* frame_buffer, int reg_x, int reg_y, int sprite_height)
@@ -482,7 +485,9 @@ void decode_and_execute(chip8_emulator* chip8, struct frameBuffer* frame_buffer,
 void load_rom(chip8_emulator* chip8, const char* rom_path)
 {
 	FILE* fp;
-	if (fopen_s(&fp, rom_path, "rb"))
+	fp = fopen(rom_path,"rb");
+	// if (fopen_s(&fp, rom_path, "rb")) // Annex K not portable standard library features 
+	if (!fp)
 	{
 		fprintf(stderr, "\nFailed to open %s.", rom_path);
 		return;
@@ -506,18 +511,22 @@ void tick(chip8_emulator* chip8, float deltaTime)
 	chip8->time_accumulate += deltaTime;
 	if (chip8->time_accumulate >= 1.0f / 60)
 	{
+	   
 		if (chip8->delay_register != 0)
 			chip8->delay_register--;
+		#ifdef _WIN32
 		if (chip8->sound_register != 0)
 		{
 			cs_play_sound(chip8->sound_context, chip8->play_sound);
 			chip8->sound_register--;
 			fprintf(stderr, "Output from sound register is : %hu.", chip8->sound_register);
 		}
+		#endif
 		chip8->time_accumulate -= 1.0f / 60;
 	}
+	#ifdef _WIN32
 	if (chip8->time_accumulate < 0.2f)
 		cs_mix(chip8->sound_context);
-
+	#endif
 	// fprintf(stderr, "\nFPS is -> %f.", 1 / deltaTime);
 }
