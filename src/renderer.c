@@ -145,6 +145,7 @@ int initialize_renderer(struct Renderer* render_engine, struct frameBuffer* fram
 	glEnableVertexAttribArray(0);
 
 	free(vertices);
+	free(index_order);
 
 	glBindVertexArray(0);
 	return 0;
