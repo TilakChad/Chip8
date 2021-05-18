@@ -91,15 +91,13 @@ int main(int argc, char** argv)
 	initialize_chip8_emulator(&chip8, rom_path);
 #ifdef _WIN32
 	chip8.sound_context = cs_make_context(glfwGetWin32Window(window), 44100, 8192, 5, NULL);
-#elif _linux_ 
-	chip8.sound_context = cs_make_context(glfwGetX11Window(window), 44100, 8192, 5, NULL);
-#endif
 	assert(chip8.sound_context != NULL);
 	if (chip8.sound_context == NULL)
 	{
 		fprintf(stderr, "\nSound context NULL..");
 		return -1;
 	}
+#endif 
 	double now = 0, then = 0;
 	glfwSwapInterval(0);
 	int counter = 0;
@@ -136,7 +134,7 @@ int main(int argc, char** argv)
 		handle_key_press(window, &chip8);
 		glfwPollEvents();
 	}
-
+	free(frame_buffer.array);
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
